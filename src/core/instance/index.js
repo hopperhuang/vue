@@ -17,7 +17,9 @@ function Vue (options) {
 }
 
 // 修改vue方法，给vue类注入方法
+// 将_init方法注入到vue.prototype
 initMixin(Vue)
+//
 stateMixin(Vue)
 eventsMixin(Vue)
 lifecycleMixin(Vue)

@@ -16,6 +16,7 @@ export default class Dep {
   subs: Array<Watcher>;
 
   constructor () {
+    // 通过id给wachter记录不同的依赖
     this.id = uid++
     this.subs = []
   }
@@ -29,7 +30,9 @@ export default class Dep {
   }
 
   depend () {
+    // 调用wachteradddepend
     if (Dep.target) {
+      // adddep 会调用 addsub ,将wachter将入到sub队列
       Dep.target.addDep(this)
     }
   }
@@ -44,6 +47,7 @@ export default class Dep {
       subs.sort((a, b) => a.id - b.id)
     }
     for (let i = 0, l = subs.length; i < l; i++) {
+      // 调用队列中wather的update方法
       subs[i].update()
     }
   }

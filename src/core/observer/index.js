@@ -41,8 +41,10 @@ export class Observer {
 
   constructor (value: any) {
     this.value = value
+    // 生成一个依赖对象
     this.dep = new Dep()
     this.vmCount = 0
+    // 将value的__ob__属性指向这个实例
     def(value, '__ob__', this)
     if (Array.isArray(value)) {
       const augment = hasProto
@@ -105,13 +107,15 @@ function copyAugment (target: Object, src: Object, keys: Array<string>) {
  * Attempt to create an observer instance for a value,
  * returns the new observer if successfully observed,
  * or the existing observer if the value already has one.
+ * --> 调用observer
  */
 export function observe (value: any, asRootData: ?boolean): Observer | void {
-  if (!isObject(value) || value instanceof VNode) {
+  if (!isObject(value) || value instanceof VNode) { // 非对象 活着时vnode的情况下返回.
     return
   }
   let ob: Observer | void
-  if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
+  if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) { // 检测是否已经时ob对象
+    // ob定义为value.__ob__
     ob = value.__ob__
   } else if (
     shouldObserve &&
@@ -120,6 +124,7 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
     Object.isExtensible(value) &&
     !value._isVue
   ) {
+    // 生成一个ob对象
     ob = new Observer(value)
   }
   if (asRootData && ob) {
@@ -130,6 +135,7 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
 
 /**
  * Define a reactive property on an Object.
+ *  ---> Dep
  */
 export function defineReactive (
   obj: Object,
@@ -140,13 +146,16 @@ export function defineReactive (
 ) {
   const dep = new Dep()
 
+  // get descripter 属性
   const property = Object.getOwnPropertyDescriptor(obj, key)
   if (property && property.configurable === false) {
     return
   }
 
   // cater for pre-defined getter/setters
+  // 定义getter
   const getter = property && property.get
+  // 定义setter
   const setter = property && property.set
   if ((!getter || setter) && arguments.length === 2) {
     val = obj[key]
@@ -156,11 +165,14 @@ export function defineReactive (
   Object.defineProperty(obj, key, {
     enumerable: true,
     configurable: true,
+    // 被get的时候加入依赖，加入依赖
     get: function reactiveGetter () {
       const value = getter ? getter.call(obj) : val
       if (Dep.target) {
+        // 加入依赖
         dep.depend()
         if (childOb) {
+          // 加入依赖
           childOb.dep.depend()
           if (Array.isArray(value)) {
             dependArray(value)
@@ -180,11 +192,14 @@ export function defineReactive (
         customSetter()
       }
       if (setter) {
+        // 调用setter
         setter.call(obj, newVal)
       } else {
         val = newVal
       }
+      // 将新对象设置为obsever
       childOb = !shallow && observe(newVal)
+      // 值更新的时候调用notify
       dep.notify()
     }
   })
@@ -194,6 +209,10 @@ export function defineReactive (
  * Set a property on an object. Adds the new property and
  * triggers change notification if the property doesn't
  * already exist.
+ * 定义一个属性, 增加新的属性且触发变动通知，如果属性尚不存在
+ * 用法： vue.set(this.items, 0, {name: 'hopperhuang'})
+ * 修改data中的属性
+ * set --> defineReactive
  */
 export function set (target: Array<any> | Object, key: any, val: any): any {
   if (process.env.NODE_ENV !== 'production' &&
@@ -201,28 +220,35 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
   ) {
     warn(`Cannot set reactive property on undefined, null, or primitive value: ${(target: any)}`)
   }
-  if (Array.isArray(target) && isValidArrayIndex(key)) {
+  if (Array.isArray(target) && isValidArrayIndex(key)) { // target是数组
+    // 扩展key长度
     target.length = Math.max(target.length, key)
+    // 将key插入到array
     target.splice(key, 1, val)
+    // 返回值
     return val
   }
   if (key in target && !(key in Object.prototype)) {
+    // 修改key的值得
     target[key] = val
     return val
   }
+  // data属性中的__ob__对象
   const ob = (target: any).__ob__
-  if (target._isVue || (ob && ob.vmCount)) {
+  if (target._isVue || (ob && ob.vmCount)) { // 不能修改vue对象和root data
     process.env.NODE_ENV !== 'production' && warn(
       'Avoid adding reactive properties to a Vue instance or its root $data ' +
       'at runtime - declare it upfront in the data option.'
     )
     return val
   }
-  if (!ob) {
+  if (!ob) { // ob不存在，什么也不用做
+    // 只设置tareget.key的值
     target[key] = val
     return val
   }
   defineReactive(ob.value, key, val)
+  // 通知依赖属性
   ob.dep.notify()
   return val
 }
