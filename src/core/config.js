@@ -7,7 +7,7 @@ import {
 } from 'shared/util'
 
 import { LIFECYCLE_HOOKS } from 'shared/constants'
-
+// vue.config可以配置此对象
 export type Config = {
   // user
   optionMergeStrategies: { [key: string]: Function };
