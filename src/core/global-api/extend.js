@@ -20,6 +20,7 @@ export function initExtend (Vue: GlobalAPI) {
     extendOptions = extendOptions || {}
     const Super = this
     const SuperId = Super.cid
+    // 缓存作用
     const cachedCtors = extendOptions._Ctor || (extendOptions._Ctor = {})
     if (cachedCtors[SuperId]) {
       return cachedCtors[SuperId]
@@ -27,28 +28,37 @@ export function initExtend (Vue: GlobalAPI) {
 
     const name = extendOptions.name || Super.options.name
     if (process.env.NODE_ENV !== 'production' && name) {
+      // 检测componentname是否合法
       validateComponentName(name)
     }
 
     const Sub = function VueComponent (options) {
+      // 调用vue._init方法
       this._init(options)
     }
+    // 原形指向vue
     Sub.prototype = Object.create(Super.prototype)
+    // 构造器指向本身
     Sub.prototype.constructor = Sub
+    // id自增
     Sub.cid = cid++
+    // 合并options到sub.options
     Sub.options = mergeOptions(
       Super.options,
       extendOptions
     )
+    // super指向夫类
     Sub['super'] = Super
 
     // For props and computed properties, we define the proxy getters on
     // the Vue instances at extension time, on the extended prototype. This
     // avoids Object.defineProperty calls for each instance created.
     if (Sub.options.props) {
+      // 初始化props
       initProps(Sub)
     }
     if (Sub.options.computed) {
+      // 初始化computed
       initComputed(Sub)
     }
 
@@ -83,6 +93,8 @@ export function initExtend (Vue: GlobalAPI) {
 function initProps (Comp) {
   const props = Comp.options.props
   for (const key in props) {
+    // Comp.prototpye -> sub.prototpye -> super.prototype -> vue
+    // comp.prototype.key = comp.prototpype._props.key
     proxy(Comp.prototype, `_props`, key)
   }
 }
@@ -90,6 +102,7 @@ function initProps (Comp) {
 function initComputed (Comp) {
   const computed = Comp.options.computed
   for (const key in computed) {
+    // comp.prototype.key 的getter 和setter 被 computed.key(Function) 血脂
     defineComputed(Comp.prototype, key, computed[key])
   }
 }

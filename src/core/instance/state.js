@@ -42,6 +42,7 @@ export function proxy (target: Object, sourceKey: string, key: string) {
   sharedPropertyDefinition.set = function proxySetter (val) {
     this[sourceKey][key] = val
   }
+  // target.key = target.sourceky.key
   Object.defineProperty(target, key, sharedPropertyDefinition)
 }
 
@@ -237,6 +238,7 @@ export function defineComputed (
       )
     }
   }
+  // 挟持target.key的get,set方法
   Object.defineProperty(target, key, sharedPropertyDefinition)
 }
 

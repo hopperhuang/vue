@@ -87,6 +87,7 @@ export function withMacroTask (fn: Function): Function {
   })
 }
 
+// 将cb放到callback,暂时不知道callback有什么用
 export function nextTick (cb?: Function, ctx?: Object) {
   let _resolve
   callbacks.push(() => {

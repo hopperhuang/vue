@@ -7,6 +7,7 @@ import { initExtend } from './extend'
 import { initAssetRegisters } from './assets'
 import { set, del } from '../observer/index'
 import { ASSET_TYPES } from 'shared/constants'
+// { keepalive }
 import builtInComponents from '../components/index'
 
 import {
@@ -17,7 +18,7 @@ import {
   defineReactive
 } from '../util/index'
 
-export function initGlobalAPI(Vue: GlobalAPI) {
+export function initGlobalAPI (Vue: GlobalAPI) {
   // config
   const configDef = {}
   configDef.get = () => config
@@ -51,7 +52,7 @@ export function initGlobalAPI(Vue: GlobalAPI) {
  */
     defineReactive
   }
-/**
+  /**
  * Set a property on an object. Adds the new property and
  * triggers change notification if the property doesn't
  * already exist.
@@ -62,7 +63,7 @@ export function initGlobalAPI(Vue: GlobalAPI) {
  */
   Vue.delete = del
 
-  //在下次 DOM 更新循环结束之后执行延迟回调。在修改数据之后立即使用这个方法，获取更新后的 DOM。
+  // 在下次 DOM 更新循环结束之后执行延迟回调。在修改数据之后立即使用这个方法，获取更新后的 DOM。
   Vue.nextTick = nextTick
 
   // 创建options对象，原型指向null
@@ -76,14 +77,14 @@ export function initGlobalAPI(Vue: GlobalAPI) {
   // components with in Weex's multi-instance scenarios.
   Vue.options._base = Vue
 
-  // 将buildincomponents 的属性复制到components
+  // 将buildincomponents 的属性复制到components, 只有一个keepalive属性
   extend(Vue.options.components, builtInComponents)
 
   // 初始化use方法
   initUse(Vue)
   // 初始化init方法
   initMixin(Vue)
-  // 初始化extend方法
+  // 初始化extend方法 使用基础 Vue 构造器，创建一个“子类”。参数是一个包含组件选项的对象
   initExtend(Vue)
   // 初始化assetregister方法
   initAssetRegisters(Vue)

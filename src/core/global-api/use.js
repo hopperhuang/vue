@@ -18,7 +18,7 @@ export function initUse (Vue: GlobalAPI) {
       // 执行insall
       plugin.install.apply(plugin, args)
     } else if (typeof plugin === 'function') { // plugin is function
-        // 执行plugin
+      // 执行plugin
       plugin.apply(null, args)
     }
     // 加入已安装plugin

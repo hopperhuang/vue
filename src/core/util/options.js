@@ -25,6 +25,8 @@ import {
  * how to merge a parent option value and a child option
  * value into the final value.
  */
+
+// 控对象{} 合并策略
 const strats = config.optionMergeStrategies
 
 /**
@@ -235,9 +237,10 @@ strats.computed = function (
 strats.provide = mergeDataOrFn
 
 /**
- * Default strategy.
+ * Default strategy. 默认的合并策略
  */
 const defaultStrat = function (parentVal: any, childVal: any): any {
+  // childval不存在才使用parentval
   return childVal === undefined
     ? parentVal
     : childVal
@@ -247,7 +250,9 @@ const defaultStrat = function (parentVal: any, childVal: any): any {
  * Validate component names
  */
 function checkComponents (options: Object) {
+  // 遍历components属性
   for (const key in options.components) {
+    // 检测components.name是否合法
     validateComponentName(key)
   }
 }
@@ -260,7 +265,7 @@ export function validateComponentName (name: string) {
       'and must start with a letter.'
     )
   }
-  if (isBuiltInTag(name) || config.isReservedTag(name)) {
+  if (isBuiltInTag(name) || config.isReservedTag(name)) { // 内置tag和保留tag则警告
     warn(
       'Do not use built-in or reserved HTML elements as component ' +
       'id: ' + name
@@ -274,6 +279,7 @@ export function validateComponentName (name: string) {
  */
 function normalizeProps (options: Object, vm: ?Component) {
   const props = options.props
+  // 没有props属性，返回
   if (!props) return
   const res = {}
   let i, val, name
@@ -283,18 +289,20 @@ function normalizeProps (options: Object, vm: ?Component) {
       val = props[i]
       if (typeof val === 'string') {
         name = camelize(val)
+        // res[val] = {type: null}
         res[name] = { type: null }
       } else if (process.env.NODE_ENV !== 'production') {
         warn('props must be strings when using array syntax.')
       }
     }
-  } else if (isPlainObject(props)) {
+  } else if (isPlainObject(props)) { // 是一个普通object
     for (const key in props) {
       val = props[key]
       name = camelize(key)
+      // 值是否plainobject
       res[name] = isPlainObject(val)
-        ? val
-        : { type: val }
+        ? val // val
+        : { type: val } // type苏醒
     }
   } else if (process.env.NODE_ENV !== 'production') {
     warn(
@@ -303,6 +311,7 @@ function normalizeProps (options: Object, vm: ?Component) {
       vm
     )
   }
+  // 修改props对象为res
   options.props = res
 }
 
@@ -310,6 +319,7 @@ function normalizeProps (options: Object, vm: ?Component) {
  * Normalize all injections into Object-based format
  */
 function normalizeInject (options: Object, vm: ?Component) {
+  // 平面化injections
   const inject = options.inject
   if (!inject) return
   const normalized = options.inject = {}
@@ -337,11 +347,13 @@ function normalizeInject (options: Object, vm: ?Component) {
  * Normalize raw function directives into object format.
  */
 function normalizeDirectives (options: Object) {
+  // 指令
   const dirs = options.directives
   if (dirs) {
     for (const key in dirs) {
       const def = dirs[key]
       if (typeof def === 'function') {
+        // 绑定def, update: def
         dirs[key] = { bind: def, update: def }
       }
     }
@@ -368,20 +380,26 @@ export function mergeOptions (
   vm?: Component
 ): Object {
   if (process.env.NODE_ENV !== 'production') {
+    // 检测components.name是否合法
     checkComponents(child)
   }
 
-  if (typeof child === 'function') {
+  if (typeof child === 'function') { // 判断是否function
     child = child.options
   }
 
+  // child.props存在才会执行此方法
   normalizeProps(child, vm)
+  // child.inject存在才会执行此方法
   normalizeInject(child, vm)
+  // child.directives存在才会执行此方法
   normalizeDirectives(child)
   const extendsFrom = child.extends
-  if (extendsFrom) {
+  if (extendsFrom) { // 判断child.extends是否存在
+    // 对extends属性执行此方法
     parent = mergeOptions(parent, extendsFrom, vm)
   }
+  // mixins存在，遍历执行此方法
   if (child.mixins) {
     for (let i = 0, l = child.mixins.length; i < l; i++) {
       parent = mergeOptions(parent, child.mixins[i], vm)
@@ -390,17 +408,21 @@ export function mergeOptions (
   const options = {}
   let key
   for (key in parent) {
+    // 将parent的属性合并到options
     mergeField(key)
   }
   for (key in child) {
     if (!hasOwn(parent, key)) {
+      // 将child的属性合并到options
       mergeField(key)
     }
   }
+  // 合并属性
   function mergeField (key) {
     const strat = strats[key] || defaultStrat
     options[key] = strat(parent[key], child[key], vm, key)
   }
+  // 返回options
   return options
 }
 
