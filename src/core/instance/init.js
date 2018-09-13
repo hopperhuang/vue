@@ -37,7 +37,8 @@ export function initMixin (Vue: Class<Component>) {
       // internal component options needs special treatment.
       // 初始化内建组件
       initInternalComponent(vm, options)
-    } else {
+    } else { // 需要实例化的不是component时会触发这个方法
+      // 将superopions, modified options注入$opionts对象
       vm.$options = mergeOptions(
         resolveConstructorOptions(vm.constructor),
         options || {},
@@ -52,6 +53,7 @@ export function initMixin (Vue: Class<Component>) {
     }
     // expose real self
     vm._self = vm
+    // 组件初始化流程从这里开始
     initLifecycle(vm)
     initEvents(vm)
     initRender(vm)
@@ -68,13 +70,13 @@ export function initMixin (Vue: Class<Component>) {
       measure(`vue ${vm._name} init`, startTag, endTag)
     }
 
-    if (vm.$options.el) {
+    if (vm.$options.el) { // el 存在则调用挂载方法
       vm.$mount(vm.$options.el)
     }
   }
 }
 
-// 被初始化的实例isComponent时才触发此方法
+// 被初始化的实例isComponent时才触发此方法 将相关信息注入到$opitons
 export function initInternalComponent (vm: Component, options: InternalComponentOptions) {
   // vm.constructor -> Vue
   // 将opitons 注入到vm实例$opitons属性 
@@ -105,40 +107,54 @@ export function initInternalComponent (vm: Component, options: InternalComponent
 }
 
 export function resolveConstructorOptions (Ctor: Class<Component>) {
+  // 从contstructor取出opitons
   let options = Ctor.options
-  if (Ctor.super) {
+  if (Ctor.super) { // super存在 --> 通过vue.extends 创建的实例会有super属性
+    // 因为vue.extend出来的constructor指向sub,所以需要向sub.super即vue获取options
+    // 从super 获取 opitons
     const superOptions = resolveConstructorOptions(Ctor.super)
+    // 获取 获取本身的superOptions
     const cachedSuperOptions = Ctor.superOptions
     if (superOptions !== cachedSuperOptions) {
       // super option changed,
       // need to resolve new options.
+      // 更新superopitons
       Ctor.superOptions = superOptions
       // check if there are any late-modified/attached options (#4976)
       const modifiedOptions = resolveModifiedOptions(Ctor)
       // update base extend options
       if (modifiedOptions) {
+        // 什么时extendOpitons
         extend(Ctor.extendOptions, modifiedOptions)
       }
+      // 合并opitons
       options = Ctor.options = mergeOptions(superOptions, Ctor.extendOptions)
       if (options.name) {
+        // 定义组件名
         options.components[options.name] = Ctor
       }
     }
   }
+  // 返回opitons
   return options
 }
 
 function resolveModifiedOptions (Ctor: Class<Component>): ?Object {
   let modified
+  // 最新opitons
   const latest = Ctor.options
+  // 扩展options
   const extended = Ctor.extendOptions
+  // sealed opitons
   const sealed = Ctor.sealedOptions
+  // 更新opitons
   for (const key in latest) {
     if (latest[key] !== sealed[key]) {
       if (!modified) modified = {}
       modified[key] = dedupe(latest[key], extended[key], sealed[key])
     }
   }
+  // 返回被修改的对象
   return modified
 }
 
