@@ -5,6 +5,7 @@ import Watcher from '../observer/watcher'
 import { pushTarget, popTarget } from '../observer/dep'
 import { isUpdatingChildComponent } from './lifecycle'
 
+// 观察者/观察属性
 import {
   set,
   del,
@@ -313,8 +314,11 @@ export function stateMixin (Vue: Class<Component>) {
   // flow somehow has problems with directly declared definition object
   // when using Object.defineProperty, so we have to procedurally build up
   // the object here.
+
+  // data definition
   const dataDef = {}
   dataDef.get = function () { return this._data }
+  // props definition
   const propsDef = {}
   propsDef.get = function () { return this._props }
   if (process.env.NODE_ENV !== 'production') {
@@ -329,12 +333,16 @@ export function stateMixin (Vue: Class<Component>) {
       warn(`$props is readonly.`, this)
     }
   }
+  // 重写$data对象的get方法
   Object.defineProperty(Vue.prototype, '$data', dataDef)
+  // 重写$props的get方法
   Object.defineProperty(Vue.prototype, '$props', propsDef)
 
+  // 定义set 方法
   Vue.prototype.$set = set
+  // 定义delete方法
   Vue.prototype.$delete = del
-
+  // 定义$watch方法
   Vue.prototype.$watch = function (
     expOrFn: string | Function,
     cb: any,

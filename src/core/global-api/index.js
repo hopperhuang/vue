@@ -32,6 +32,10 @@ export function initGlobalAPI (Vue: GlobalAPI) {
   // 定义vue.config方法
   Object.defineProperty(Vue, 'config', configDef)
 
+
+
+  // but where is the comfig and compile api??
+
   // exposed util methods.
   // NOTE: these are not considered part of the public API - avoid relying on
   // them unless you are aware of the risk.

@@ -5,7 +5,7 @@ import { isPlainObject, validateComponentName } from '../util/index'
 
 // 初始化静态注册器
 export function initAssetRegisters (Vue: GlobalAPI) {
-  /**
+  /** Vue.components filters directives
    * Create asset registration methods.
    */
   ASSET_TYPES.forEach(type => {
