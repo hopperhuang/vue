@@ -94,6 +94,7 @@ export default class Watcher {
       this.value = undefined
       this.dep = new Dep()
     } else {
+      // 调用get方法
       this.value = this.get()
     }
   }
@@ -102,6 +103,7 @@ export default class Watcher {
    * Evaluate the getter, and re-collect dependencies.
    */
   get () {
+    // 设置Dep类的target
     pushTarget(this)
     let value
     const vm = this.vm
@@ -119,6 +121,7 @@ export default class Watcher {
       if (this.deep) {
         traverse(value)
       }
+      // 调用proptarget方法，再次设置dep.target
       popTarget()
       this.cleanupDeps()
     }

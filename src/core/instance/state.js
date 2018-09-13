@@ -343,6 +343,7 @@ export function stateMixin (Vue: Class<Component>) {
   // 定义delete方法
   Vue.prototype.$delete = del
   // 定义$watch方法
+  // watch放飞被调用时,会调用watcher, watcher会将watch添加到Dep.target中，从而形成依赖
   Vue.prototype.$watch = function (
     expOrFn: string | Function,
     cb: any,
