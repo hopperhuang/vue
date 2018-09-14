@@ -197,9 +197,10 @@ export function defineReactive (
       } else {
         val = newVal
       }
-      // 将新对象设置为obsever
+      // 将新对象设置为obsever -> defineReactive 定义一个getter 和 stter
+      // childOb即key的值为一个可观察对象
       childOb = !shallow && observe(newVal)
-      // 值更新的时候调用notify
+      // 值更新的时候调用notify -> 调用get -> 调用getter -> watcher存在的情况下 将watcher计入subs队列
       dep.notify()
     }
   })
@@ -247,6 +248,7 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
     target[key] = val
     return val
   }
+  // this.items.value getter已被挟持
   defineReactive(ob.value, key, val)
   // 通知依赖属性
   ob.dep.notify()

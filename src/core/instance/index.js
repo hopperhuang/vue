@@ -21,8 +21,11 @@ function Vue (options) {
 initMixin(Vue)
 // 将set/delete/watch方法 $data和$props注入到vue.prototype
 stateMixin(Vue)
+// 定义了$on $once $off $emmit方法
 eventsMixin(Vue)
+// 生命周期方法 定义了$update $forceupdate $destroy方法
 lifecycleMixin(Vue)
+// render方法 定义了一些方便使用的方法renderHelpers $nexttick _render
 renderMixin(Vue)
 
 export default Vue

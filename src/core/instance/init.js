@@ -54,11 +54,17 @@ export function initMixin (Vue: Class<Component>) {
     // expose real self
     vm._self = vm
     // 组件初始化流程从这里开始
+    // 初始化生命周期循环
     initLifecycle(vm)
+    // init parent attached events
     initEvents(vm)
+    // 将createelement 方法注入到vm
     initRender(vm)
+    // 调用beforeCreate方法
     callHook(vm, 'beforeCreate')
+    // 从上到下注入属性
     initInjections(vm) // resolve injections before data/props
+    // init props, init state, init computed, initWatch
     initState(vm)
     initProvide(vm) // resolve provide after data/props
     callHook(vm, 'created')
@@ -90,7 +96,7 @@ export function initInternalComponent (vm: Component, options: InternalComponent
   // 从parentnode获取componentOptions
   const vnodeComponentOptions = parentVnode.componentOptions
   // 注入propsdata
-  opts.propsData = vnodeComponentOptions.propsData\
+  opts.propsData = vnodeComponentOptions.propsData
   // 注入listener
   opts._parentListeners = vnodeComponentOptions.listeners
   // 注入chidlren

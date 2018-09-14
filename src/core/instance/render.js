@@ -15,6 +15,7 @@ import VNode, { createEmptyVNode } from '../vdom/vnode'
 
 import { isUpdatingChildComponent } from './lifecycle'
 
+// render方法
 export function initRender (vm: Component) {
   vm._vnode = null // the root of the child tree
   vm._staticTrees = null // v-once cached trees
@@ -52,12 +53,15 @@ export function initRender (vm: Component) {
 
 export function renderMixin (Vue: Class<Component>) {
   // install runtime convenience helpers
+  // 将一些方便调用的方法绑定到vue.prototype
   installRenderHelpers(Vue.prototype)
 
+  // next tick方法
   Vue.prototype.$nextTick = function (fn: Function) {
     return nextTick(fn, this)
   }
 
+  // _render方法 这段逻辑有点复杂....
   Vue.prototype._render = function (): VNode {
     const vm: Component = this
     const { render, _parentVnode } = vm.$options
@@ -70,12 +74,13 @@ export function renderMixin (Vue: Class<Component>) {
       }
     }
 
-    if (_parentVnode) {
+    if (_parentVnode) { // 这个设置有什么用呢？
       vm.$scopedSlots = _parentVnode.data.scopedSlots || emptyObject
     }
 
     // set parent vnode. this allows render functions to have access
     // to the data on the placeholder node.
+    // 不太理解这里的操作
     vm.$vnode = _parentVnode
     // render self
     let vnode
@@ -110,6 +115,7 @@ export function renderMixin (Vue: Class<Component>) {
           vm
         )
       }
+      // 创建一个空的node来处理错误渲染
       vnode = createEmptyVNode()
     }
     // set parent

@@ -46,12 +46,14 @@ export function updateComponentListeners (
 export function eventsMixin (Vue: Class<Component>) {
   const hookRE = /^hook:/
   Vue.prototype.$on = function (event: string | Array<string>, fn: Function): Component {
+    // vm --> Vue.prototype
     const vm: Component = this
     if (Array.isArray(event)) {
       for (let i = 0, l = event.length; i < l; i++) {
         this.$on(event[i], fn)
       }
     } else {
+      // 将fn push到 _events
       (vm._events[event] || (vm._events[event] = [])).push(fn)
       // optimize hook:event cost by using a boolean flag marked at registration
       // instead of a hash lookup
@@ -62,6 +64,7 @@ export function eventsMixin (Vue: Class<Component>) {
     return vm
   }
 
+  // 执行一次
   Vue.prototype.$once = function (event: string, fn: Function): Component {
     const vm: Component = this
     function on () {
@@ -73,6 +76,7 @@ export function eventsMixin (Vue: Class<Component>) {
     return vm
   }
 
+  // 关闭事件监听
   Vue.prototype.$off = function (event?: string | Array<string>, fn?: Function): Component {
     const vm: Component = this
     // all
@@ -111,6 +115,7 @@ export function eventsMixin (Vue: Class<Component>) {
     return vm
   }
 
+  // 发射时间
   Vue.prototype.$emit = function (event: string): Component {
     const vm: Component = this
     if (process.env.NODE_ENV !== 'production') {

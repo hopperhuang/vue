@@ -149,7 +149,8 @@ function initData (vm: Component) {
       proxy(vm, `_data`, key)
     }
   }
-  // observe data
+  // observe data 
+  // observe --> Observer --> walk --> defineReactive
   observe(data, true /* asRootData */)
 }
 
@@ -170,7 +171,7 @@ const computedWatcherOptions = { computed: true }
 
 function initComputed (vm: Component, computed: Object) {
   // $flow-disable-line
-  const watchers = vm._computedWatchers = Object.create(null)
+  const watchers = vm._computedWatchers = Object.create(null) // 记录在_computedwatchers属性上
   // computed properties are just getters during SSR
   const isSSR = isServerRendering()
 
@@ -185,6 +186,7 @@ function initComputed (vm: Component, computed: Object) {
     }
 
     if (!isSSR) {
+      // 将computed属性变为watcher, 这样就可以挂到dep.target上，被dep.pend依赖
       // create internal watcher for the computed property.
       watchers[key] = new Watcher(
         vm,
@@ -198,6 +200,7 @@ function initComputed (vm: Component, computed: Object) {
     // component prototype. We only need to define computed properties defined
     // at instantiation here.
     if (!(key in vm)) {
+      // 定义computend参数
       defineComputed(vm, key, userDef)
     } else if (process.env.NODE_ENV !== 'production') {
       if (key in vm.$data) {
@@ -216,16 +219,19 @@ export function defineComputed (
 ) {
   const shouldCache = !isServerRendering()
   if (typeof userDef === 'function') {
+    // get方法
     sharedPropertyDefinition.get = shouldCache
       ? createComputedGetter(key)
       : userDef
     sharedPropertyDefinition.set = noop
   } else {
+    // get 方法
     sharedPropertyDefinition.get = userDef.get
       ? shouldCache && userDef.cache !== false
         ? createComputedGetter(key)
         : userDef.get
       : noop
+    // set 方法
     sharedPropertyDefinition.set = userDef.set
       ? userDef.set
       : noop
@@ -245,9 +251,12 @@ export function defineComputed (
 
 function createComputedGetter (key) {
   return function computedGetter () {
+    // 从之前收藏的watcher里面去除对应的watcher
     const watcher = this._computedWatchers && this._computedWatchers[key]
     if (watcher) {
+      // watcher.dep.depend()
       watcher.depend()
+      // --> watcher.get --> pustareget --> watch.getter --> ??
       return watcher.evaluate()
     }
   }
@@ -307,6 +316,7 @@ function createWatcher (
   if (typeof handler === 'string') {
     handler = vm[handler]
   }
+  // 直接调用已经注入的$watch方法
   return vm.$watch(expOrFn, handler, options)
 }
 

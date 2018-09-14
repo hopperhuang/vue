@@ -52,11 +52,13 @@ export function lifecycleMixin (Vue: Class<Component>) {
     const vm: Component = this
     const prevEl = vm.$el
     const prevVnode = vm._vnode
-    const prevActiveInstance = activeInstance
-    activeInstance = vm
+    const prevActiveInstance = activeInstance // null
+    activeInstance = vm // this
     vm._vnode = vnode
     // Vue.prototype.__patch__ is injected in entry points
     // based on the rendering backend used.
+    // 判断是初始化还是更新
+    // 定义挂载的element
     if (!prevVnode) {
       // initial render
       vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)
@@ -64,8 +66,9 @@ export function lifecycleMixin (Vue: Class<Component>) {
       // updates
       vm.$el = vm.__patch__(prevVnode, vnode)
     }
-    activeInstance = prevActiveInstance
+    activeInstance = prevActiveInstance // null
     // update __vue__ reference
+    // 更新vue引用
     if (prevEl) {
       prevEl.__vue__ = null
     }
@@ -80,6 +83,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     // updated in a parent's updated hook.
   }
 
+  // 强制跟新
   Vue.prototype.$forceUpdate = function () {
     const vm: Component = this
     if (vm._watcher) {
@@ -87,6 +91,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     }
   }
 
+  // 
   Vue.prototype.$destroy = function () {
     const vm: Component = this
     if (vm._isBeingDestroyed) {
@@ -95,10 +100,13 @@ export function lifecycleMixin (Vue: Class<Component>) {
     callHook(vm, 'beforeDestroy')
     vm._isBeingDestroyed = true
     // remove self from parent
+    // 从组件树移除
     const parent = vm.$parent
     if (parent && !parent._isBeingDestroyed && !vm.$options.abstract) {
       remove(parent.$children, vm)
     }
+    
+    // 清除监听
     // teardown watchers
     if (vm._watcher) {
       vm._watcher.teardown()
@@ -107,6 +115,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     while (i--) {
       vm._watchers[i].teardown()
     }
+    // 清除数据引用
     // remove reference from data ob
     // frozen object may not have observer.
     if (vm._data.__ob__) {
@@ -325,7 +334,7 @@ export function callHook (vm: Component, hook: string) {
       }
     }
   }
-  if (vm._hasHookEvent) {
+  if (vm._hasHookEvent) { // 是否hashook, hashook则emit⌚️
     vm.$emit('hook:' + hook)
   }
   popTarget()

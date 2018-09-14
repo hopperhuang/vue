@@ -90,8 +90,9 @@ export default class Watcher {
         )
       }
     }
-    if (this.computed) {
+    if (this.computed) { // computed的时候走这个语句
       this.value = undefined
+      // 生成可依赖对象
       this.dep = new Dep()
     } else {
       // 调用get方法
