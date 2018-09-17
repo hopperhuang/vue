@@ -66,7 +66,9 @@ export function initMixin (Vue: Class<Component>) {
     initInjections(vm) // resolve injections before data/props
     // init props, init state, init computed, initWatch
     initState(vm)
+    // 注入_provide属性
     initProvide(vm) // resolve provide after data/props
+    // 调用created方法
     callHook(vm, 'created')
 
     /* istanbul ignore if */
